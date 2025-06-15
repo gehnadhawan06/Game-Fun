@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="stylesG.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Begins</title>
+
+    <style>
+        .animate-fireblast {
+            animation: fireblast 0.7s ease;
+        }
+
+        @keyframes fireblast {
+            0% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+                filter: brightness(2);
+            }
+
+            100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+        }
+
+        .animate-slash {
+            animation: slash 0.7s ease;
+        }
+
+        @keyframes slash {
+            0% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(-10px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        #commentary {
+            transform-origin: center;
+            position: absolute;
+            bottom: 250px;
+            left: 50%;
+            font-size: 35px;
+            color: white;
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0;
+            animation: none;
+            z-index: 50;
+            min-width: 250px;
+            max-width: 450px;
+            text-align: center;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="gameWrapper" id="gameWrapper">
+        <div class="background">
+            <div id="commentary">
+            </div>
+
+            <div class="battlefield">
+
+                <div class="character hero-section">
+
+                    <div class="hp-bar">
+                        <div id="heroHP" class="hp-fill"></div>
+                    </div>
+
+                    <h2 id="heroName">Hero</h2>
+
+                    <div class="charimage">
+                        <img id="heroImg" src="" alt="Hero Image" class="character-img">
+                    </div>
+
+                </div>
+
+
+
+                <div class="character villain-section">
+
+                    <div class="hp-bar">
+                        <div id="villainHP" class="hp-fill"></div>
+                    </div>
+
+                    <h2 id="villainName">Villain</h2>
+
+                    <div class="charimage">
+                        <img id="villainImg" src="" alt="Villain Image" class="character-img">
+                    </div>
+
+
+                </div>
+            </div>
+
+            <div class="controls" id="heroControls"></div>
+
+            <button class="goback" onclick="goBack()">x</button>
+
+        </div>
+    </div>
+
+    <div id="overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;">
+    </div>
+    <div id="victoryModal" style="display:none;" class="modal-popup">
+        <h2>Victory!</h2>
+        <div class="modal-buttons">
+            <button onclick="startAgain()">Start Again</button>
+            <button onclick="goHome()">Go Back</button>
+        </div>
+    </div>
+
+    <div id="lossModal" style="display:none;" class="modal-popup">
+        <h2 style="color: white;">You Lost...</h2>
+        <div class="modal-buttons">
+            <button onclick="startAgain()">Try Again</button>
+            <button onclick="goHome()">Retreat</button>
+        </div>
+    </div>
+
+    <img id="bloodSpatter" src="bloodspat.png" alt="Blood Spatter"
+        style="display:none; position:fixed; top:0; left:0; width:95%; height:95%; object-fit:contain; z-index:1000; pointer-events:none;">
+
+
+    <script>
+
+        function goBack() {
+            disableControls();
+            showCommentary("You left the battle!");
+
+            setTimeout(() => {
+                localStorage.removeItem("selectedHero");
+                localStorage.removeItem("selectedVill");
+                window.location.href = "arena.html";
+            }, 1400);
+        }
+
+
+        let hero = JSON.parse(localStorage.getItem("selectedHero"));
+        let villain = JSON.parse(localStorage.getItem("selectedVill"));
+
+        document.getElementById("heroName").textContent = hero.name;
+        document.getElementById("heroImg").src = hero.imgSrc;
+
+        document.getElementById("villainName").textContent = villain.name;
+        document.getElementById("villainImg").src = villain.imgSrc;
+
+        let heroHP = 100;
+        let villainHP = 100;
+
+        const heroPowers = hero.powers || [];
+        const villainPowers = villain.powers || [];
+
+
+        function updateHP() {
+            const heroHPBar = document.getElementById("heroHP");
+            const villainHPBar = document.getElementById("villainHP");
+
+            heroHP = Math.max(0, heroHP);
+            villainHP = Math.max(0, villainHP);
+
+            heroHPBar.style.width = heroHP + "%";
+            villainHPBar.style.width = villainHP + "%";
+        }
+
+        function getDamage(intensity) {
+            if (intensity === "low") return Math.floor(Math.random() * 10) + 5;
+            if (intensity === "medium") return Math.floor(Math.random() * 15) + 10;
+            if (intensity === "high") return Math.floor(Math.random() * 20) + 15;
+            return 10; 
+        }
+
+        const controlBox = document.getElementById("heroControls");
+
+        heroPowers.forEach((power, index) => {
+            const btn = document.createElement("button");
+            btn.textContent = power.name;
+            btn.onclick = () => {
+                console.log("Button clicked!");
+                const dmg = getDamage(power.intensity);
+                villainHP -= dmg;
+                showCommentary(`${hero.name} used ${power.name} for ${dmg} damage!`);
+                animateAttack('heroImg', power.animation);
+                updateHP();
+                checkWin();
+                if (villainHP > 0) villainTurn();
+            };
+            controlBox.appendChild(btn);
+        });
+
+        const healBtn = document.createElement("button");
+        healBtn.textContent = "Heal";
+        healBtn.onclick = () => {
+            const heal = Math.floor(Math.random() * 20) + 10;
+            heroHP = Math.min(100, heroHP + heal);
+            showCommentary(`${hero.name} healed for ${heal} HP!`);
+            updateHP();
+            villainTurn();
+        };
+        controlBox.appendChild(healBtn);
+
+        function showCommentary(message) {
+            const commentary = document.getElementById('commentary');
+            commentary.textContent = message;
+
+            commentary.style.transition = 'none';
+            commentary.style.transform = 'translateX(-50%) scale(0.8)';
+            commentary.style.opacity = 0;
+            void commentary.offsetHeight;
+
+            commentary.style.transition = 'transform 1.2s ease, opacity 1.2s ease';
+            commentary.style.transform = 'translateX(-50%) scale(1.2)';
+            commentary.style.opacity = 1;
+
+            setTimeout(() => {
+                commentary.style.transform = 'translateX(-50%) scale(0.8)';
+                commentary.style.opacity = 0;
+            }, 1200);
+
+            setTimeout(() => {
+                commentary.textContent = '';
+            }, 2400);
+        }
+
+        function villainTurn() {
+            const actionType = Math.random();
+
+            if (actionType < 0.2) {
+                // Heal
+                const heal = Math.floor(Math.random() * 20) + 10;
+                villainHP = Math.min(100, villainHP + heal);
+                showCommentary(`${villain.name} healed for ${heal} HP!`);
+            } else {
+                // Attack
+                const move = villainPowers[Math.floor(Math.random() * villainPowers.length)];
+                const dmg = getDamage(move.intensity || "medium");
+                heroHP -= dmg;
+                showCommentary(`${villain.name} used ${move.name} for ${dmg} damage!`);
+                animateAttack("heroImg", move.animation || "slash");
+            }
+
+            updateHP();
+            if (heroHP <= 0) {
+                disableControls();
+
+                const blood = document.getElementById("bloodSpatter");
+                blood.style.display = "block";
+                blood.style.opacity = 0;
+                blood.style.transition = "opacity 0.5s ease";
+                setTimeout(() => {
+                    blood.style.opacity = 1;
+                    document.body.style.overflow = "hidden";
+                }, 100);
+
+                document.getElementById("gameWrapper").classList.add("blur-background");
+                showCommentary("You Lost...");
+
+                setTimeout(() => {
+                    document.getElementById("lossModal").style.display = "block";
+                }, 1400);
+            }
+        }
+
+        function launchConfetti() {
+            const duration = 2 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+
+            const interval = setInterval(function () {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, {
+                    particleCount,
+                    origin: { x: Math.random(), y: Math.random() - 0.2 }
+                }));
+            }, 250);
+        }
+
+
+        function checkWin() {
+            const btn = document.getElementById("startAgainBtn");
+            if (villainHP <= 0) {
+                // HERO WINS
+                showCommentary(`${hero.name} wins!`);
+                disableControls();
+                setTimeout(() => {
+                    launchConfetti();
+                    document.body.classList.add("modal-open");
+                    document.getElementById("gameWrapper").classList.add("blur-background");
+                    document.getElementById("victoryModal").style.display = "block";
+                }, 1400);
+            }
+        }
+
+        function startAgain() {
+            document.body.classList.remove("modal-open");
+            document.getElementById("gameWrapper").classList.remove("blur-background");
+            window.location.href = "characters.html"; 
+        }
+
+        function goHome() {
+            localStorage.removeItem("selectedHero");
+            localStorage.removeItem("selectedVill");
+            document.body.classList.remove("modal-open");
+            document.getElementById("gameWrapper").classList.remove("blur-background");
+            window.location.href = "arena.html"; 
+        }
+
+
+
+        function animateAttack(targetId, type) {
+            const el = document.getElementById(targetId);
+            el.classList.add("animate-" + type);
+
+            setTimeout(() => {
+                el.classList.remove("animate-" + type);
+            }, 700);
+        }
+
+        function disableControls() {
+            document.querySelectorAll(".controls button").forEach(btn => btn.disabled = true);
+        }
+
+        updateHP();
+    </script>
+
+    <!-- Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+</body>
+
+</html>

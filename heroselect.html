@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Hero</title>
+  <link rel="stylesheet" href="stylesHV.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    .selected {
+      border: 3px solid #00f;
+
+      border-radius: 10px;
+      transform: scale(0.80);
+
+      transition: transform 0.3s ease, border-color 0.3s ease;
+      box-sizing: border-box;
+
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="background">
+    <button class="goback" onclick="goBack()">⇐</button>
+
+    <div class="dialog">
+      <h1>CHOOSE YOUR HERO</h1>
+
+      <div class="swiper hero-swiper">
+        <div class="swiper-wrapper">
+
+          <div class="swiper-slide">
+            <div class="item">
+              <img src="char1.png" alt="char1" class="image">
+              <h2 class="badge">Ravenn</h2>
+            </div>
+          </div>
+
+          <div class="swiper-slide">
+            <div class="item">
+              <img src="char2.png" alt="char2" class="image">
+              <h2 class="badge">Zyren</h2>
+            </div>
+          </div>
+
+          <div class="swiper-slide">
+            <div class="item">
+              <img src="char3.png" alt="char3" class="image">
+              <h2 class="badge">Kurojin</h2>
+            </div>
+          </div>
+
+          <div class="swiper-slide">
+            <div class="item">
+              <img src="char4.png" alt="char4" class="image">
+              <h2 class="badge">Vesper</h2>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation buttons and pagination -->
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function goBack() {
+      window.history.back();
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script>
+    new Swiper('.hero-swiper', {
+      loop: true,
+      spaceBetween: 30,
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+        dynamicBullets: true
+      },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev'
+      },
+      breakpoints: {
+        0: { slidesPerView: 1 },
+        768: { slidesPerView: 2 },
+        1024: { slidesPerView: 3 }
+      }
+    });
+  </script>
+
+  <script>
+
+    const heroData = {
+      Ravenn: {
+        powers: [
+          { name: "Wind Cutter", intensity: "medium", animation: "slash" },
+          { name: "Aero Spiral", intensity: "high", animation: "tornado" },
+          { name: "Silent Feather", intensity: "low", animation: "pulse" }
+        ]
+      },
+      Zyren: {
+        powers: [
+          { name: "Lightning Orb", intensity: "high", animation: "bolt" },
+          { name: "Shockwave", intensity: "medium", animation: "blast" },
+          { name: "Static Pulse", intensity: "low", animation: "pulse" }
+        ]
+      },
+      Kurojin: {
+        powers: [
+          { name: "Shadow Slash", intensity: "high", animation: "slash" },
+          { name: "Dark Mirage", intensity: "medium", animation: "smoke" },
+          { name: "Gloom Grip", intensity: "low", animation: "pulse" }
+        ]
+      },
+      Vesper: {
+        powers: [
+          { name: "Starlight Beam", intensity: "high", animation: "beam" },
+          { name: "Photon Dash", intensity: "medium", animation: "flash" },
+          { name: "Radiant Blink", intensity: "low", animation: "spark" }
+        ]
+      }
+    };
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+      const charhero = document.querySelectorAll('.swiper-slide .item');
+
+      charhero.forEach(item => {
+        item.style.cursor = 'pointer';
+
+        item.addEventListener('click', () => {
+          const name = item.querySelector('.badge').textContent.trim();
+          const imgSrc = item.querySelector('img').getAttribute('src');
+          const powers = heroData[name]?.powers || [];
+
+          localStorage.setItem('selectedHero', JSON.stringify({ name, imgSrc, powers }));
+
+          charhero.forEach(i => i.classList.remove('selected'));
+          item.classList.add('selected');
+        });
+      });
+
+      const saved = localStorage.getItem('selectedHero');
+      if (saved) {
+        const selected = JSON.parse(saved);
+        charhero.forEach(item => {
+          if (item.querySelector('.badge').textContent.trim() === selected.name) {
+            item.classList.add('selected');
+          }
+        });
+      }
+    });
+  </script>
+
+
+</body>
+
+</html>

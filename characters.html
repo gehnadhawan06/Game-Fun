@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobby</title>
+</head>
+
+<body>
+    <div class="background">
+        <button class="goback" onclick="goBack()">⇐</button>
+        <i>
+            <h2 id="h22">Every war needs a hero.. and villain</h2>
+        </i>
+        <h1 id="h11">Choose your Fate</h1>
+        <div class="selection">
+            <div id="selected-hero-container">
+            </div>
+            <a href="heroselect.html" style="text-decoration: none;">
+                <div class="card">
+                    <img src="Hero Button.png" alt="Hero">
+                    <p>HERO</p>
+                </div>
+            </a>
+            <a href="villainselect.html" style="text-decoration: none;">
+                <div class="card">
+                    <img src="villain button.png" alt="Villain">
+                    <p>VILLAIN</p>
+                </div>
+            </a>
+            <div id="selected-villain-container">
+            </div>
+        </div>
+
+        <div class="play">
+        <button id="playButton" class="hidden" onclick="startGame()">PLAY</button>
+        </div>
+
+    </div>
+</body>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+
+    function checkBothSelected() {
+        const hero = localStorage.getItem('selectedHero');
+        const villain = localStorage.getItem('selectedVill');
+
+        if (hero && villain) {
+            document.getElementById('playButton').classList.remove('hidden');
+        }
+    }
+
+    function startGame() {
+        window.location.href = "game.html";
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const heroData = localStorage.getItem('selectedHero');
+        if (heroData) {
+            const charhero = JSON.parse(heroData);
+            const container = document.getElementById('selected-hero-container');
+            if (container) {
+                container.innerHTML = `
+                    <h2>Your Hero:</h2>
+                    <h1>${charhero.name}</h1>
+                `;
+            }
+        }
+
+        const villainData = localStorage.getItem('selectedVill');
+        if (villainData) {
+            const charvillain = JSON.parse(villainData);
+            const container = document.getElementById('selected-villain-container');
+            if (container) {
+                container.innerHTML = `
+                    <h2>Your Villain:</h2>
+                    <h1>${charvillain.name}</h1>
+                `;
+            }
+        }
+
+        checkBothSelected();
+    });
+
+</script>
+
+
+</html>

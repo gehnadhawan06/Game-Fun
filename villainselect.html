@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Villain</title>
+  <link rel="stylesheet" href="stylesHV.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .selected {
+      border: 3px solid #00f;
+
+      border-radius: 10px;
+      transform: scale(0.80);
+
+      transition: transform 0.3s ease, border-color 0.3s ease;
+      box-sizing: border-box;
+
+    }
+  </style>
+</head>
+
+<body>
+  <div class="background">
+    <button class="goback" onclick="goBack()">⇐</button>
+
+    <div class="dialog">
+      <h1>CHOOSE YOUR VILLAIN</h1>
+
+      <div class="swiper villain-swiper">
+        <div class="swiper-wrapper">
+
+          <div class="swiper-slide">
+            <div class="item">
+              <img src="char11.png" alt="char1" class="image">
+              <h2 class="badge">Gloom Golem</h2>
+            </div>
+          </div>
+
+          <div class="swiper-slide">
+            <div class="item">
+              <img src="char12.png" alt="char2" class="image">
+              <h2 class="badge">Dante</h2>
+            </div>
+          </div>
+
+          <div class="swiper-slide">
+            <div class="item">
+              <img src="char13.png" alt="char3" class="image">
+              <h2 class="badge">Ryzen</h2>
+            </div>
+          </div>
+
+          <div class="swiper-slide">
+            <div class="item">
+              <img src="char14.png" alt="char4" class="image">
+              <h2 class="badge">Akihiko</h2>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation buttons and pagination -->
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function goBack() {
+      window.history.back();
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script>
+    new Swiper('.villain-swiper', {
+      loop: true,
+      spaceBetween: 30,
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+        dynamicBullets: true
+      },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev'
+      },
+      breakpoints: {
+        0: { slidesPerView: 1 },
+        768: { slidesPerView: 2 },
+        1024: { slidesPerView: 3 }
+      }
+    });
+  </script>
+
+  <script>
+
+    const villainData = {
+      "Gloom Golem": {
+        powers: [
+          { name: "Rock Slam", intensity: "high", animation: "quake" },
+          { name: "Dust Storm", intensity: "medium", animation: "sandblast" },
+          { name: "Stone Glare", intensity: "low", animation: "pulse" }
+        ]
+      },
+      "Dante": {
+        powers: [
+          { name: "Hellfire", intensity: "high", animation: "fireblast" },
+          { name: "Inferno Dash", intensity: "medium", animation: "flame" },
+          { name: "Scorch Sting", intensity: "low", animation: "spark" }
+        ]
+      },
+      "Ryzen": {
+        powers: [
+          { name: "Cyber Shred", intensity: "high", animation: "glitch" },
+          { name: "Neon Blade", intensity: "medium", animation: "slash" },
+          { name: "Static Pulse", intensity: "low", animation: "zap" }
+        ]
+      },
+      "Akihiko": {
+        powers: [
+          { name: "Blade Fury", intensity: "high", animation: "slash" },
+          { name: "Dark Spiral", intensity: "medium", animation: "vortex" },
+          { name: "Silent Cut", intensity: "low", animation: "fade" }
+        ]
+      }
+    };
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+      const charvill = document.querySelectorAll('.swiper-slide .item');
+
+      charvill.forEach(item => {
+        item.style.cursor = 'pointer';
+
+        item.addEventListener('click', () => {
+
+          const name = item.querySelector('.badge').textContent.trim();
+          const imgSrc = item.querySelector('img').getAttribute('src');
+          const powers = villainData[name]?.powers || [];
+
+          localStorage.setItem('selectedVill', JSON.stringify({ name, imgSrc, powers }));
+
+
+          charvill.forEach(i => i.classList.remove('selected'));
+          item.classList.add('selected');
+        });
+      });
+
+
+      const saved = localStorage.getItem('selectedVill');
+      if (saved) {
+        const selected = JSON.parse(saved);
+        charvill.forEach(item => {
+          if (item.querySelector('.badge').textContent.trim() === selected.name) {
+            item.classList.add('selected');
+          }
+        });
+      }
+    });
+  </script>
+
+</body>
+
+</html>

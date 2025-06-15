@@ -1,0 +1,106 @@
+body {
+  box-sizing: border-box;
+  font-family: 'Ribeye', cursive;
+  background-color: black;
+  margin: 0;
+}
+
+.background {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1400px;
+  height: 670px;
+  background-image: url('background.png');
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #fff;
+  border-radius: 12px;
+  position: relative;
+  gap: 20px;
+    padding-left: 50px;
+    margin: 30px 30px 20px 30px;
+}
+
+.goback {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  border: 4px solid black;
+  background-color: white;
+  color: black;
+  border-radius: 30px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  z-index: 10;
+}
+
+.goback:hover {
+  transform: scale(1.1);
+}
+
+.dialog {
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 30px;
+  width: 90%;
+  height: auto;
+  max-width: 900px;
+  border-radius: 15px;
+  text-align: center;
+}
+
+h1 {
+  color: #fff;
+  font-size: 2.2rem;
+  margin-bottom: 25px;
+}
+
+.item {
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  height: 150%;
+  display: flex;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.card:active {
+    transform: translateY(5px);
+}
+
+.item:hover{
+    scale: 1.09;
+}
+
+.image {
+  height: 400px;
+  width: 170px;
+  border-radius: 20px;
+  object-fit: cover;
+   image-rendering: pixelated;
+}
+
+.badge {
+  font-size: 1.1rem;
+  margin-top: 10px;
+  padding: 6px 16px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #00ffff;
+  border: 2px solid #00ffff;
+  border-radius: 30px;
+  text-shadow: 1px 1px 2px black;
+  letter-spacing: 1px;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  color: white;
+}
+
+.swiper-pagination-bullet-active {
+  background: aqua;
+}

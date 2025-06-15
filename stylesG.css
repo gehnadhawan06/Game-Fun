@@ -1,0 +1,202 @@
+/* Background styling */
+.background {
+  background: url('background.png') no-repeat center center/cover;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-left: 50px;
+  width: 1400px;
+  height: 570px;
+  margin: 30px auto;
+  border: 2px solid #fff;
+  border-radius: 12px;
+}
+
+body.villain-loss {
+    background-color: #330000;
+    transition: background-color 1.2s ease;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+#commentary.loss {
+    color: #ff5e5e;
+    font-size: 45px;
+    text-shadow: 0 0 15px red;
+}
+
+/* Modal */
+.modal-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    background-color: black;
+    color: white;
+    padding: 30px;
+    font-size: 25px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(255,255,255,0.4);
+    z-index: 1001;
+    animation: popModal 1s ease forwards;
+}
+
+.modal-buttons button {
+    font-size: 20px;
+    padding: 10px 20px;
+    margin: 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background-color: white;
+    color: black;
+}
+
+@keyframes popModal {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+}
+
+.blur-background {
+    filter: blur(6px) brightness(0.6);
+    transition: filter 0.5s ease;
+}
+
+#victoryModal {
+    position: fixed;
+     backdrop-filter: none !important;
+    filter: none !important;
+    z-index: 1002 !important;
+}
+
+
+body {
+  box-sizing: border-box;
+  font-family: 'Ribeye', cursive;
+  background-color: black;
+
+}
+
+.goback {
+  position: absolute;
+  top: 640px;
+  left: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 60px;
+
+  font-size: 34px;
+  line-height: 60px;
+  text-align: center;
+  font-weight: 300;
+  background-color: #cc0000;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 2;
+}
+
+
+.battlefield {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 90%;
+  padding: 0 40px 0px 50px;
+  margin-top: 180px;
+  height: 550px;
+  border-radius: 8px;
+}
+
+.character {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 300px;
+  height: 100%;
+}
+
+
+.charimage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 0;
+  height: 390px;
+}
+
+.character img {
+  height: 80%;
+  object-fit: contain;
+  max-height: 100%;
+   image-rendering: pixelated;
+}
+
+
+.hp-bar {
+  position: absolute;
+  top: 140px;
+  height: 15px;
+  width: 170px;
+  background-color: #555;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 3px solid white;
+}
+
+.hp-fill {
+  height: 100%;
+  background: linear-gradient(to right, #ff007a, #ffae00);
+  transition: width 0.3s ease-in-out;
+}
+
+.hp-bar.left {
+  left: 50px;
+}
+
+.hp-bar.right {
+  right: 80px;
+}
+
+.controls {
+  transform: translateY(30px);
+  display: flex;
+  justify-content: center;
+}
+
+.controls button {
+  background: transparent;
+  margin: 0 10px;
+  border: 8px solid white;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 10px;
+  text-align: center;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.controls button:hover {
+  background-color: white;
+  color: #1a002f;
+}
+
+.character h2 {
+  color: white;
+  margin-top: 10px;
+}
