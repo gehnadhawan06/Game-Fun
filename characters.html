@@ -36,13 +36,32 @@
         </div>
 
         <div class="play">
-        <button id="playButton" class="hidden" onclick="startGame()">PLAY</button>
+            <button id="playButton" class="hidden" onclick="startGame()">PLAY</button>
         </div>
 
     </div>
+
+    <audio id="character-theme" src="theme_song.mp3" loop></audio>
+
 </body>
 
 <script>
+
+    window.addEventListener('load', () => {
+        const theme = document.getElementById('character-theme');
+        theme.volume = 1.0;
+
+        const playPromise = theme.play();
+
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {
+                window.addEventListener('click', () => {
+                    theme.play();
+                }, { once: true });
+            });
+        }
+    });
+
     function goBack() {
         window.history.back();
     }

@@ -65,10 +65,62 @@
             text-align: center;
             text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
         }
+
+        .fade-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .fade-text {
+            color: white;
+            font-size: 3em;
+            font-family: 'Ribeye', cursive;
+            opacity: 0;
+            animation: fadeText 2s ease forwards;
+        }
+
+        @keyframes fadeText {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .fade-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
     </style>
 </head>
 
 <body>
+
+    <div id="transitionScreen" class="fade-screen">
+        <div class="fade-text">Battle Begins...</div>
+    </div>
+
+    <audio id="drumroll" src="drumroll.mp3" preload="auto"></audio>
+
     <div class="gameWrapper" id="gameWrapper">
         <div class="background">
             <div id="commentary">
@@ -106,6 +158,26 @@
 
 
                 </div>
+
+                <div id="lightning-overlay" style="display: none; position: fixed; top: 0; left: 0; 
+            width: 100vw; height: 100vh; 
+            z-index: 2000; pointer-events: none;">
+                </div>
+
+                <div id="lightning-container" style="position: absolute; z-index: 2100;pointer-events: none;"></div>
+
+                <div id="nuke-container"
+                    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                       z-index: 999; display: none; justify-content: center; align-items: center; pointer-events: none; ">
+                </div>
+
+                <div id="flamethrow-container" style=" position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                          pointer-events: none; z-index: 1800;">
+                </div>
+                <div id="villain-flamethrow-container" style="position: fixed; top: 0; left: 0;
+                 display: none; z-index: 1500; pointer-events: none;"></div>
+
+
             </div>
 
             <div class="controls" id="heroControls"></div>
@@ -137,8 +209,31 @@
     <img id="bloodSpatter" src="bloodspat.png" alt="Blood Spatter"
         style="display:none; position:fixed; top:0; left:0; width:95%; height:95%; object-fit:contain; z-index:1000; pointer-events:none;">
 
+    <audio id="fireball-sound" src="fireball_sound.mp3" preload="auto"></audio>
+    <audio id="explosion-sound" src="explosion_sound.mp3" preload="auto"></audio>
+    <audio id="lightning-sound" src="lightning_sound.mp3" preload="auto"></audio>
+    <audio id="heal-sound" src="heal_sound.mp3" preload="auto"></audio>
+    <audio id="victory-sound" src="fanfare.mp3" preload="auto"></audio>
+    <audio id="blood-sound" src="slash.mp3" preload="auto"></audio>
+    <audio id="loss-sound" src="loss_sound.mp3" preload="auto"></audio>
+
+
+
 
     <script>
+
+        window.addEventListener('load', () => {
+            const transition = document.getElementById("transitionScreen");
+            const drumroll = document.getElementById("drumroll");
+
+            drumroll.volume = 1.0;
+            drumroll.play().catch(() => { });
+
+            setTimeout(() => {
+                transition.classList.add("fade-out");
+            }, 2500);
+        });
+
 
         function goBack() {
             disableControls();
@@ -183,7 +278,7 @@
             if (intensity === "low") return Math.floor(Math.random() * 10) + 5;
             if (intensity === "medium") return Math.floor(Math.random() * 15) + 10;
             if (intensity === "high") return Math.floor(Math.random() * 20) + 15;
-            return 10; 
+            return 10;
         }
 
         const controlBox = document.getElementById("heroControls");
@@ -197,6 +292,31 @@
                 villainHP -= dmg;
                 showCommentary(`${hero.name} used ${power.name} for ${dmg} damage!`);
                 animateAttack('heroImg', power.animation);
+                let lightningTriggered = false;
+                let explosionTriggered = false;
+
+                if (power.intensity === "medium" && Math.random() < 0.4) {
+                    playLightningCentered("hero");
+                    lightningTriggered = true;
+                }
+
+
+                if (power.intensity === "high" && Math.random() < 0.3) {
+                    playNukeExplosion("hero");
+                    explosionTriggered = true;
+                }
+
+                if (
+                    (power.intensity === "medium" || power.intensity === "high") &&
+                    !lightningTriggered &&
+                    !explosionTriggered
+                ) {
+                    playHeroFireball();
+                }
+
+                if (power.intensity === "low") {
+                    playHeroFireball();
+                }
                 updateHP();
                 checkWin();
                 if (villainHP > 0) villainTurn();
@@ -207,6 +327,13 @@
         const healBtn = document.createElement("button");
         healBtn.textContent = "Heal";
         healBtn.onclick = () => {
+
+            const healSound = document.getElementById("heal-sound");
+            healSound.currentTime = 0;
+            healSound.volume = 1.0;
+            healSound.play().catch(() => { });
+
+            animateAttack("heroImg", "fireblast");
             const heal = Math.floor(Math.random() * 20) + 10;
             heroHP = Math.min(100, heroHP + heal);
             showCommentary(`${hero.name} healed for ${heal} HP!`);
@@ -243,6 +370,12 @@
 
             if (actionType < 0.2) {
                 // Heal
+                const healSound = document.getElementById("heal-sound");
+                healSound.currentTime = 0;
+                healSound.volume = 1.0;
+                healSound.play().catch(() => { });
+
+                animateAttack("villainImg", "fireblast");
                 const heal = Math.floor(Math.random() * 20) + 10;
                 villainHP = Math.min(100, villainHP + heal);
                 showCommentary(`${villain.name} healed for ${heal} HP!`);
@@ -253,7 +386,34 @@
                 heroHP -= dmg;
                 showCommentary(`${villain.name} used ${move.name} for ${dmg} damage!`);
                 animateAttack("heroImg", move.animation || "slash");
+
+                let lightningTriggered = false;
+                let explosionTriggered = false;
+
+                if (move.intensity === "medium" && Math.random() < 0.4) {
+                    playLightningCentered("villain");
+                    lightningTriggered = true;
+                }
+
+                if (move.intensity === "high" && Math.random() < 0.3) {
+                    playNukeExplosion("villain");
+                    explosionTriggered = true;
+                }
+
+                if (
+                    (move.intensity === "medium" || move.intensity === "high") &&
+                    !lightningTriggered &&
+                    !explosionTriggered
+                ) {
+                    playVillainFireball();
+                }
+
+                if (move.intensity === "low") {
+                    playVillainFireball();
+                }
+
             }
+
 
             updateHP();
             if (heroHP <= 0) {
@@ -266,12 +426,25 @@
                 setTimeout(() => {
                     blood.style.opacity = 1;
                     document.body.style.overflow = "hidden";
+
+                    const bloodSound = document.getElementById("blood-sound");
+                    if (bloodSound) {
+                        bloodSound.currentTime = 0;
+                        bloodSound.volume = 1.0;
+                        bloodSound.play().catch(() => { });
+                    }
                 }, 100);
 
                 document.getElementById("gameWrapper").classList.add("blur-background");
                 showCommentary("You Lost...");
 
                 setTimeout(() => {
+                    const lossSound = document.getElementById("loss-sound");
+                    if (lossSound) {
+                        lossSound.currentTime = 0;
+                        lossSound.volume = 1.0;
+                        lossSound.play().catch(() => { });
+                    }
                     document.getElementById("lossModal").style.display = "block";
                 }, 1400);
             }
@@ -306,6 +479,14 @@
                 disableControls();
                 setTimeout(() => {
                     launchConfetti();
+
+                    const victorySound = document.getElementById("victory-sound");
+                    if (victorySound) {
+                        victorySound.currentTime = 0;
+                        victorySound.volume = 1.0;
+                        victorySound.play().catch(() => { });
+                    }
+
                     document.body.classList.add("modal-open");
                     document.getElementById("gameWrapper").classList.add("blur-background");
                     document.getElementById("victoryModal").style.display = "block";
@@ -316,7 +497,7 @@
         function startAgain() {
             document.body.classList.remove("modal-open");
             document.getElementById("gameWrapper").classList.remove("blur-background");
-            window.location.href = "characters.html"; 
+            window.location.href = "characters.html";
         }
 
         function goHome() {
@@ -324,8 +505,100 @@
             localStorage.removeItem("selectedVill");
             document.body.classList.remove("modal-open");
             document.getElementById("gameWrapper").classList.remove("blur-background");
-            window.location.href = "arena.html"; 
+            window.location.href = "arena.html";
         }
+
+        function playVillainFireball() {
+            const container = document.getElementById('villain-flamethrow-container');
+            container.innerHTML = '';
+            document.body.style.overflow = 'hidden';
+
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const startX = screenWidth - 600;
+            const y = screenHeight / 2 - 150;
+
+            let x = startX;
+            container.style.top = `${y}px`;
+            container.style.left = `${x}px`;
+            container.style.display = 'block';
+
+            let frame = 1;
+            const totalFrames = 24;
+
+            const fireballSound = document.getElementById('fireball-sound');
+            if (fireballSound) {
+                fireballSound.currentTime = 0;
+                fireballSound.volume = 1.0;
+                fireballSound.play().catch(() => { });
+            }
+
+            function showFrame() {
+                if (x <= 150) {
+                    container.innerHTML = '';
+                    container.style.display = 'none';
+                    document.body.style.overflow = '';
+                    return;
+                }
+
+
+                x -= 20;
+                container.style.left = `${x}px`;
+
+
+                container.innerHTML = `<img src="png3/${frame}.png" style="height: 50vh; width: auto; transform: scaleX(-1);">`;
+                frame = frame % totalFrames + 1;
+
+                setTimeout(showFrame, 50);
+            }
+
+            showFrame();
+        }
+
+
+        function playHeroFireball() {
+            const container = document.getElementById('flamethrow-container');
+            container.innerHTML = '';
+            document.body.style.overflow = 'hidden';
+
+            const screenHeight = window.innerHeight;
+            const startX = 150; // Start near hero
+            const y = screenHeight / 2 - 150;
+
+            let x = startX;
+            container.style.top = `${y}px`;
+            container.style.left = `${x}px`;
+            container.style.display = 'block';
+
+            let frame = 0;
+            const totalFrames = 40;
+
+            const fireballSound = document.getElementById('fireball-sound');
+            if (fireballSound) {
+                fireballSound.currentTime = 0;
+                fireballSound.volume = 1.0;
+                fireballSound.play().catch(() => { });
+            }
+
+            function showFrame() {
+                if (frame > totalFrames) {
+                    container.innerHTML = '';
+                    container.style.display = 'none';
+                    document.body.style.overflow = '';
+                    return;
+                }
+
+                x += 20;
+                container.style.left = `${x}px`;
+
+                container.innerHTML = `<img src="PNG/${frame}.png" style="height: 50vh; width: auto;">`;
+                frame++;
+                setTimeout(showFrame, 50);
+            }
+
+            showFrame();
+        }
+
 
 
 
@@ -337,6 +610,98 @@
                 el.classList.remove("animate-" + type);
             }, 700);
         }
+
+        function playNukeExplosion(who = "hero") {
+            const container = document.getElementById('nuke-container');
+            container.style.display = 'flex';
+
+            if (who === "hero") {
+                container.style.background = "radial-gradient(circle at center, rgba(255, 255, 100, 0.7), rgba(255, 150, 0, 0.8), rgba(255, 100, 0, 0.9))";
+            } else {
+                container.style.background = "radial-gradient(circle at center, rgba(200, 50, 50, 0.7), rgba(100, 0, 0, 0.8), rgba(60, 0, 0, 0.9))";
+            }
+
+            let frame = 1;
+            const totalFrames = 10;
+
+            const sound = document.getElementById('explosion-sound');
+            if (sound) {
+                sound.volume = 1.0;
+                sound.currentTime = 0;
+                sound.play().catch(() => { });
+            }
+
+            function showFrame() {
+                if (frame > totalFrames) {
+                    container.style.display = 'none';
+                    container.innerHTML = '';
+                    return;
+                }
+
+                container.innerHTML = `<img src="Nuclear_explosion/Nuclear_explosion${frame}.png" 
+            style="width: auto; height: 100vh; object-fit: contain;">`;
+                frame++;
+                setTimeout(showFrame, 70);
+            }
+
+            showFrame();
+        }
+
+
+        function playLightningCentered(who = "hero") {
+            const container = document.getElementById('lightning-container');
+            const overlay = document.getElementById("lightning-overlay");
+
+
+            overlay.innerHTML = '';
+            container.innerHTML = '';
+            overlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+
+
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const x = screenWidth / 2 - 50;
+            const y = 0;
+
+            container.style.position = 'fixed';
+            container.style.left = `${x}px`;
+            container.style.top = `${y}px`;
+            container.style.zIndex = 2100;
+
+            const lightningSound = document.getElementById('lightning-sound');
+            if (lightningSound) {
+                lightningSound.currentTime = 1.2;
+                lightningSound.volume = 1.0;
+                lightningSound.play().catch(() => { });
+            }
+
+
+            overlay.style.background = who === "hero"
+                ? 'radial-gradient(circle at center, rgba(0, 200, 255, 0.6), rgba(0, 100, 200, 0.5), rgba(0, 50, 100, 0.4))'
+                : 'radial-gradient(circle at center, rgba(180, 0, 255, 0.6), rgba(100, 0, 180, 0.5), rgba(50, 0, 120, 0.4))';
+
+            let frame = 1;
+            const totalFrames = 19;
+
+            function showFrame() {
+                if (frame > totalFrames) {
+                    overlay.style.display = "none";
+                    document.body.style.overflow = '';
+                    overlay.style.background = "none";
+                    overlay.innerHTML = '';
+                    container.innerHTML = '';
+                    return;
+                }
+
+                container.innerHTML = `<img src="Lightning/light${frame}.png" style="width:auto; height:90vh;">`;
+                frame++;
+                setTimeout(showFrame, 50);
+            }
+
+            showFrame();
+        }
+
 
         function disableControls() {
             document.querySelectorAll(".controls button").forEach(btn => btn.disabled = true);

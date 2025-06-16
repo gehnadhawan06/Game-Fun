@@ -72,6 +72,9 @@
     </div>
   </div>
 
+  <audio id="click-sound" src="click_sound.mp3" preload="auto"></audio>
+
+
   <script>
     function goBack() {
       window.history.back();
@@ -142,6 +145,15 @@
         item.style.cursor = 'pointer';
 
         item.addEventListener('click', () => {
+
+          const clickSound = document.getElementById('click-sound');
+          if (clickSound) {
+            clickSound.currentTime = 0;
+            clickSound.volume = 1.0;
+            clickSound.play().catch(() => { });
+          }
+
+
           const name = item.querySelector('.badge').textContent.trim();
           const imgSrc = item.querySelector('img').getAttribute('src');
           const powers = heroData[name]?.powers || [];
