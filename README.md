@@ -19,5 +19,10 @@ HTML | CSS | JavaScript
 
 ---
 
-Created by **Gehna Dhawan** 🌟  
 Assets from [Craftpix.net](https://craftpix.net)
+
+## 🔊 Sound Credits
+
+All the sound effects and background music used in this project were sourced from [Pixabay](https://pixabay.com/) under their free-to-use license.
+
+Special thanks to the amazing creators for their work!
